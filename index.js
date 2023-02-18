@@ -1,20 +1,52 @@
 
 const container = document.getElementById('container');
+const buttonAnimated = document.getElementById('buttonAnimated')
+
+let limitePokemon = 100;
+
+const typeColors = {
+    electric: '#FFEA70',
+    normal: '#B09398',
+    fire: '#FF675C',
+    water: '#0596C7',
+    ice: '#AFEAFD',
+    rock: '#999799',
+    flying: '#7AE7C7',
+    grass: '#4A9681',
+    psychic: '#FFC6D9',
+    ghost: '#561D25',
+    bug: '#A2FAA3',
+    poison: '#795663',
+    ground: '#D2B074',
+    dragon: '#DA627D',
+    steel: '#1D8A99',
+    fighting: '#2F2F2F',
+    default: '#2A1A1F',
+};
 
 //llamamos a la API para conseguir los datos
-function addPokemon(id){
-fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`)
-.then(res => res.json())
-.then(data => 
-    createPokemon(data))
+async function addPokemon(id){
+    try{
+const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/?language=es/`)
+const data = await response.json() 
+    createPokemon(data)
+}
+catch(error){
+    console.error(error);
+} 
 }
 
+
 //iteramos entre los pokemones llamando a la funcion con los datos 
-function pokemon(num){
-    for(let i = 0; i<=num; i++){
+function pokemon(limitePokemon){
+    for(let i = 0; i<=limitePokemon; i++){
     addPokemon(i)
     }
 }
+
+/* imgPokemon.src = poke['sprites']['versions']['generation-v']['black-white']['animated']['front_default']; */
+
+
 
 function createPokemon(poke){
 
@@ -32,8 +64,10 @@ function createPokemon(poke){
     //agregamos la imagen del pokemon
     const imgPokemon = document.createElement('img');
     imgPokemon.classList.add('imgPoke')
-    imgPokemon.src = poke.sprites.other.home.front_default;
-
+    imgPokemon.src = poke.sprites.front_default;
+    /* imgPokemon.src = poke.sprites.other.home.front_default;*/
+    /* imgPokemon.src = poke.sprites.other.dream_world.front_default;*/
+    
     //integramos la imagen del pokemon al div
     divImg.appendChild(imgPokemon)
 
@@ -52,7 +86,13 @@ function createPokemon(poke){
     name.classList.add('name');
     name.textContent = poke.name;
 
-    
+   
+    /* `${poke.types.map(type =>type.type.name)}`; */
+    /* 
+    if(type.textContent.includes("fire")){
+        
+        type.style.background = "red"
+     */
 
     //Agrego el elemento del ID del pokemon al card
     card2.appendChild(idPokemon)
@@ -60,9 +100,26 @@ function createPokemon(poke){
     //integramos el nombre al container
     card2.appendChild(name);
 
+    //integramos los o el tipo del pokemon
+    poke.types.forEach(type =>{
+        const typePoke = document.createElement("p")
+        typePoke.classList.add("type");
+        
+        typePoke.textContent = type.type.name;
+        typePoke.style.background = typeColors[type.type.name];
+        card2.appendChild(typePoke)
+    })
+  
+
     //integramos el container que va a tener los elementos del pokemon en el container principal
-    container.appendChild(card)
-    
+    container.appendChild(card)    
 }
 
-pokemon(100)
+pokemon(limitePokemon)
+
+
+/* buttonAnimated.onclick = (e) => {
+    e.preventDefault()
+    createPokemonAnimated(pokemon(1));
+    
+} */
