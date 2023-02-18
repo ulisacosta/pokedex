@@ -1,0 +1,91 @@
+
+body{
+    background: -webkit-linear-gradient(90deg,
+    rgba(85, 144, 189, 1) 0%,
+    rgba(108, 183, 240, 1) 54%,
+    rgba(182, 216, 242, 1) 82%);
+    background: -o-linear-gradient(90deg,
+    rgba(85, 144, 189, 1) 0%,
+    rgba(108, 183, 240, 1) 54%,
+    rgba(182, 216, 242, 1) 82%);
+    background: -moz-linear-gradient(90deg,
+    rgba(85, 144, 189, 1) 0%,
+    rgba(108, 183, 240, 1) 54%,
+    rgba(182, 216, 242, 1) 82%);
+    background: linear-gradient(90deg,
+    rgba(85, 144, 189, 1) 0%,
+    rgba(108, 183, 240, 1) 54%,
+    rgba(182, 216, 242, 1) 82%);
+
+    margin:0px !important;
+
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Oswald", sans-serif;
+}
+
+  
+
+.title{
+    color: #344e41;
+    text-transform: capitalize;
+}
+
+.container{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 30px;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
+    margin-top: 20px;
+}
+
+.card{
+    position: relative;
+    border-radius: 10px;
+    height: 250px;
+    background-color: #023047;
+    z-index: 1;
+} 
+
+
+
+.card2{
+    position: relative;
+    margin: 0 8px 0px 8px ;
+    height: 110px;
+    background-color: #344e41;
+    border-radius: 10px;
+    z-index: 2;
+    padding-top: 2px;
+}
+
+.idPokemon{
+    margin-top: 2px;
+    position: relative;
+    height: 5px;
+    color: white;    
+    letter-spacing: 1px;
+}
+
+.name{
+    position: relative;
+    height: 2px;
+    color: white;
+    text-transform: capitalize;
+    font-style: italic;
+    
+}
+
+.imgPoke{
+    position: relative;
+    margin-top: 5px;
+    padding: 10px;
+    background-color: #f7d1cd;
+    width: 100px;
+    height: 100px;
+    border-radius: 10px;
+    z-index: 3;
+}
