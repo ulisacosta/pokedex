@@ -2,7 +2,7 @@
 const container = document.getElementById('container');
 const buttonAnimated = document.getElementById('buttonAnimated')
 
-let limitePokemon = 100;
+let limitePokemon = 1000;
 
 const typeColors = {
     electric: '#FFEA70',
@@ -22,7 +22,8 @@ const typeColors = {
     steel: '#1D8A99',
     fighting: '#2F2F2F',
     default: '#2A1A1F',
-    fairy: '#FFFFFF'
+    fairy: '#FFFFFF',
+    dark: '#FFFFFF'
 };
 
 //llamamos a la API para conseguir los datos
@@ -39,9 +40,9 @@ catch(error){
 
 
 //iteramos entre los pokemones llamando a la funcion con los datos 
-function pokemon(limitePokemon){
+async function pokemon(limitePokemon){
     for(let i = 0; i<=limitePokemon; i++){
-    addPokemon(i)
+    await addPokemon(i)
     }
 }
 
@@ -68,9 +69,13 @@ function createPokemon(poke){
     imgPokemon.src = poke.sprites.front_default;
     imgPokemon.onmouseenter = function(){
         imgPokemon.src = poke.sprites.back_default;
+        if(poke.sprites.back_default === null){
+            imgPokemon.src = poke.sprites.front_default;
+        }
     }
     imgPokemon.onmouseout = function(){
         imgPokemon.src = poke.sprites.front_default;
+        
     }
     
     /* imgPokemon.src = poke.sprites.other.home.front_default;*/
