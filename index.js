@@ -66,6 +66,13 @@ function createPokemon(poke){
     const imgPokemon = document.createElement('img');
     imgPokemon.classList.add('imgPoke')
     imgPokemon.src = poke.sprites.front_default;
+    imgPokemon.onmouseenter = function(){
+        imgPokemon.src = poke.sprites.back_default;
+    }
+    imgPokemon.onmouseout = function(){
+        imgPokemon.src = poke.sprites.front_default;
+    }
+    
     /* imgPokemon.src = poke.sprites.other.home.front_default;*/
     /* imgPokemon.src = poke.sprites.other.dream_world.front_default;*/
     
