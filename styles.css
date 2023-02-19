@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+
+
 
 body{
     background: -webkit-linear-gradient(90deg,
@@ -52,7 +55,10 @@ body{
     position: relative;
     border-radius: 10px;
     height: 250px;
-    background-color: #07476b;
+    background-image: url(img/forest2.jpg);
+    background-repeat: no-repeat;
+    background-size: contain;
+    /* background-color: #07476b; */
     z-index: 1;
 } 
 
@@ -62,7 +68,7 @@ body{
     position: relative;
     margin: 0 8px 0px 8px ;
     height: 110px;
-    background-color: #17809f;
+    background-color: #022631;
     border-radius: 10px;
     z-index: 2;
     padding-top: 2px;
@@ -89,9 +95,30 @@ body{
     position: relative;
     margin-top: 5px;
     padding: 10px;
-    background-color: #34194c;
+    background-color: #201628;
+   
     width: 100px;
     height: 100px;
     border-radius: 50px;
     z-index: 3;
+}
+
+.divTypes{
+   display: flex;
+   flex-direction: row;
+   justify-content: center;
+
+}
+
+.typePoke{
+    width: 50%;
+    color: #000000;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 15px;
+    border-radius:8px;    
+    margin:5px;
+    margin-left: px;
+    margin-right: 0px; 
+
 }

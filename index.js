@@ -22,6 +22,7 @@ const typeColors = {
     steel: '#1D8A99',
     fighting: '#2F2F2F',
     default: '#2A1A1F',
+    fairy: '#FFFFFF'
 };
 
 //llamamos a la API para conseguir los datos
@@ -86,13 +87,6 @@ function createPokemon(poke){
     name.classList.add('name');
     name.textContent = poke.name;
 
-   
-    /* `${poke.types.map(type =>type.type.name)}`; */
-    /* 
-    if(type.textContent.includes("fire")){
-        
-        type.style.background = "red"
-     */
 
     //Agrego el elemento del ID del pokemon al card
     card2.appendChild(idPokemon)
@@ -100,16 +94,22 @@ function createPokemon(poke){
     //integramos el nombre al container
     card2.appendChild(name);
 
+    const divTypes = document.createElement('div')
+        divTypes.classList.add('divTypes' )
     //integramos los o el tipo del pokemon
     poke.types.forEach(type =>{
-        const typePoke = document.createElement("p")
-        typePoke.classList.add("type");
         
+
+        const typePoke = document.createElement("p")
+        typePoke.classList.add("typePoke");
         typePoke.textContent = type.type.name;
         typePoke.style.background = typeColors[type.type.name];
+        
+        card2.appendChild(divTypes)
         card2.appendChild(typePoke)
+        divTypes.appendChild(typePoke) 
     })
-  
+   
 
     //integramos el container que va a tener los elementos del pokemon en el container principal
     container.appendChild(card)    
