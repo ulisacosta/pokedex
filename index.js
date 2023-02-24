@@ -1,8 +1,9 @@
 
 const container = document.getElementById('container');
 const buttonAnimated = document.getElementById('buttonAnimated')
+const buscarPokemon = document.getElementById('buscarPokemon');
 
-let limitePokemon = 1000;
+let limitePokemon = 6;
 
 const typeColors = {
     electric: '#FFEA70',
@@ -27,22 +28,23 @@ const typeColors = {
 };
 
 //llamamos a la API para conseguir los datos
-async function addPokemon(id){
-    try{
-const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/?language=es/`)
-const data = await response.json() 
-    createPokemon(data)
-}
-catch(error){
-    console.error(error);
-} 
+async function addPokemon(id) {
+    try {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/?language=es/`)
+        const data = await response.json()
+        createPokemon(data)
+       
+    }
+    catch (error) {
+        console.error(error);
+    }
 }
 
 
 //iteramos entre los pokemones llamando a la funcion con los datos 
-async function pokemon(limitePokemon){
-    for(let i = 0; i<=limitePokemon; i++){
-    await addPokemon(i)
+async function pokemon(limitePokemon) {
+    for (let i = 0; i <= limitePokemon; i++) {
+        await addPokemon(i)
     }
 }
 
@@ -50,7 +52,7 @@ async function pokemon(limitePokemon){
 
 
 
-function createPokemon(poke){
+function createPokemon(poke) {
 
     //creamos el container en el que van a estar los pokemones
     const card = document.createElement('div')
@@ -67,20 +69,20 @@ function createPokemon(poke){
     const imgPokemon = document.createElement('img');
     imgPokemon.classList.add('imgPoke')
     imgPokemon.src = poke.sprites.front_default;
-    imgPokemon.onmouseenter = function(){
+    imgPokemon.onmouseenter = function () {
         imgPokemon.src = poke.sprites.back_default;
-        if(poke.sprites.back_default === null){
+        if (poke.sprites.back_default === null) {
             imgPokemon.src = poke.sprites.front_default;
         }
     }
-    imgPokemon.onmouseout = function(){
+    imgPokemon.onmouseout = function () {
         imgPokemon.src = poke.sprites.front_default;
-        
+
     }
-    
+
     /* imgPokemon.src = poke.sprites.other.home.front_default;*/
     /* imgPokemon.src = poke.sprites.other.dream_world.front_default;*/
-    
+
     //integramos la imagen del pokemon al div
     divImg.appendChild(imgPokemon)
 
@@ -107,31 +109,37 @@ function createPokemon(poke){
     card2.appendChild(name);
 
     const divTypes = document.createElement('div')
-        divTypes.classList.add('divTypes' )
+    divTypes.classList.add('divTypes')
     //integramos los o el tipo del pokemon
-    poke.types.forEach(type =>{
-        
+    poke.types.forEach(type => {
+
 
         const typePoke = document.createElement("p")
         typePoke.classList.add("typePoke");
         typePoke.textContent = type.type.name;
         typePoke.style.background = typeColors[type.type.name];
-        
+
         card2.appendChild(divTypes)
         card2.appendChild(typePoke)
-        divTypes.appendChild(typePoke) 
+        divTypes.appendChild(typePoke)
     })
-   
+
 
     //integramos el container que va a tener los elementos del pokemon en el container principal
-    container.appendChild(card)    
+    container.appendChild(card)
+}
+
+
+buscarPokemon.addEventListener("keyup", function() {buscador()})
+
+
+function buscador(pokeBuscador) {
+    if(buscarPokemon.value === "1"){
+
+        addPokemon(buscarPokemon.value)
+   }
 }
 
 pokemon(limitePokemon)
 
 
-/* buttonAnimated.onclick = (e) => {
-    e.preventDefault()
-    createPokemonAnimated(pokemon(1));
-    
-} */
