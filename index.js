@@ -3,7 +3,16 @@ const container = document.getElementById('container');
 const buttonAnimated = document.getElementById('buttonAnimated')
 const buscarPokemon = document.getElementById('buscarPokemon');
 
-let limitePokemon = 6;
+
+
+function removeChildNodes(parent){
+    while(parent.firstChild){
+        parent.removeChild(parent.firstChild)
+    }
+}
+
+let limitePokemon = 100;
+
 
 const typeColors = {
     electric: '#FFEA70',
@@ -31,15 +40,17 @@ const typeColors = {
 async function addPokemon(id) {
     try {
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/?language=es/`)
+
         const data = await response.json()
+        
         createPokemon(data)
-       
+        
+       /*  buscarPokemon.addEventListener("keyup", function (e) { buscador(e,data) }) */
     }
     catch (error) {
         console.error(error);
     }
 }
-
 
 //iteramos entre los pokemones llamando a la funcion con los datos 
 async function pokemon(limitePokemon) {
@@ -113,7 +124,6 @@ function createPokemon(poke) {
     //integramos los o el tipo del pokemon
     poke.types.forEach(type => {
 
-
         const typePoke = document.createElement("p")
         typePoke.classList.add("typePoke");
         typePoke.textContent = type.type.name;
@@ -124,22 +134,72 @@ function createPokemon(poke) {
         divTypes.appendChild(typePoke)
     })
 
-
+  
+     
     //integramos el container que va a tener los elementos del pokemon en el container principal
     container.appendChild(card)
+
 }
 
 
-buscarPokemon.addEventListener("keyup", function() {buscador()})
+//Buscador de pokemones //
+
+buscarPokemon.addEventListener("input",function(){
+    const valorBusqueda = buscarPokemon.value.trim().toLowerCase();
+
+    if(valorBusqueda.length  < 2){
+        container.innerHTML = "";
+        return;
+    }
+
+    const url = `https://pokeapi.co/api/v2/pokemon?limit=500&offset=0`;
+
+    fetch(url)
+    .then(response => response.json())
+    .then(data => mostrarResultadosBusqueda(data,valorBusqueda))
+    .catch(error => console.error(error));
+});
+
+function mostrarResultadosBusqueda(data,valorBusqueda){
+    const pokemones = data.results;
+
+    const pokemonesFiltrados = pokemones.filter(pokemon => pokemon.name.startsWith(valorBusqueda));
 
 
-function buscador(pokeBuscador) {
-    if(buscarPokemon.value === "1"){
+    removeChildNodes(container)
 
-        addPokemon(buscarPokemon.value)
-   }
+    if(pokemonesFiltrados.length === 0){
+        const mensaje = document.createElement("p");
+        mensaje.textContent = "No se encontraron resultados para la busqueda";
+        container.appendChild(mensaje);
+        return;
+    }
+
+    pokemonesFiltrados.forEach(pokemon =>{
+        const url = pokemon.url;
+        fetch(url)
+        .then(response => response.json())
+        .then(data => mostrarPokemon(data))
+        .catch(error=>console.error(error));
+    });
 }
+
+function mostrarPokemon(pokemon) {
+    const nombre = pokemon.name;
+    const imagenUrl = pokemon.sprites.front_default;
+  
+    const nuevoElemento = document.createElement("div");
+    nuevoElemento.innerHTML = `
+      <h2>${nombre}</h2>
+      <img src="${imagenUrl}" alt="${nombre}">
+    `;
+  
+    container.appendChild(nuevoElemento);
+  }
+
+
 
 pokemon(limitePokemon)
+
 
 
