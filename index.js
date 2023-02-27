@@ -16,7 +16,7 @@ function removeDivs(){
     divsPokemonBuscados.forEach(div => div.remove());
 }
 
-let limitePokemon = 6;
+let limitePokemon = 100;
 
 
 const typeColors = {
@@ -43,6 +43,7 @@ const typeColors = {
 
 //llamamos a la API para conseguir los datos
 async function addPokemon(id) {
+  
     try {
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/?language=es/`)
         const data = await response.json()
@@ -89,7 +90,6 @@ function createPokemon(poke) {
     }
     imgPokemon.onmouseout = function () {
         imgPokemon.src = poke.sprites.front_default;
-
     }
 
     /* imgPokemon.src = poke.sprites.other.home.front_default;*/
@@ -148,24 +148,34 @@ function createPokemon(poke) {
 buscarPokemon.addEventListener("input",async function(){
   
     const valorBusqueda = buscarPokemon.value.trim().toLowerCase();
+    const url = `https://pokeapi.co/api/v2/pokemon?limit=800&offset=0`
 
   
     
     if(valorBusqueda.length  < 2){
         removeChildNodes(container)
     }
- 
-    const url = `https://pokeapi.co/api/v2/pokemon?limit=500&offset=0`;
+
+    
+    try {
+        const response = await  fetch(url)
+        const data = await response.json()
+        mostrarResultadosBusqueda(data,valorBusqueda)
+    }
+    catch (error) {
+        console.error(error);
+    }
+    /* const url = `https://pokeapi.co/api/v2/pokemon?limit=800&offset=0`;
 
     fetch(url)
     .then(response => response.json())
     .then(data => mostrarResultadosBusqueda(data,valorBusqueda))
-    .catch(error => console.error(error));
+    .catch(error => console.error(error)); */
 });
 
 
 
-function mostrarResultadosBusqueda(data,valorBusqueda){
+async function mostrarResultadosBusqueda(data,valorBusqueda){
 
     if (valorBusqueda.trim() === "" || valorBusqueda.trim().length === 1) {
         
@@ -197,14 +207,25 @@ function mostrarResultadosBusqueda(data,valorBusqueda){
 
             const primerPokemonFiltrados = pokemonesFiltrados[0];
             const url = primerPokemonFiltrados.url;
+
             if (!mostrandoPokemon) {
-            fetch(url)
+                
+                try {
+                    const response = await fetch(url)
+                    const data = await response.json()
+                    mostrarPokemon(data)
+                }
+                catch (error) {
+                    console.error(error);
+                }
+
+            /*fetch(url)
             .then(response => response.json())
             .then(data => {
                 mostrarPokemon(data);
-               /*  mostrandoPokemon = true; */
+              mostrandoPokemon = true;
             })
-            .catch(error=>console.error(error));
+            .catch(error=>console.error(error)); */
 
     } 
 }
@@ -212,35 +233,133 @@ function mostrarResultadosBusqueda(data,valorBusqueda){
 
 else{
     mostrandoPokemon = false;
-
+   
     removeDivs()
     
     pokemonesFiltrados.forEach(pokemon =>{
         const url = pokemon.url;
+        try {
+            const response =  fetch(url)
+            const data =  response.json()
+            
+            createPokemon(data)
+        }
+        catch (error) {
+            console.error(error);
+        }
+        /* const url = pokemon.url;
         fetch(url)
         .then(response => response.json())
         .then(data => createPokemon(data))
         .catch(error=>console.error(error));
-    });
+    }); */
+   
+})
 }
 }
 
 
+
+//Muestra el pokemon cuando coincide con uno solo en la búsqueda
 function mostrarPokemon(pokemon) {
     
     const nombre = pokemon.name;
-    const imagenUrl = pokemon.sprites.front_default;
-
+    const imagenAnimated = pokemon['sprites']['versions']['generation-v']['black-white']['animated']['front_default'];
+    const imagenDefault = pokemon.sprites.front_default;
     removeDivs()
 
+    //div para la carta del pokemon
     const divPokemonBuscado = document.createElement("div");
     divPokemonBuscado.classList.add('divPokemonBuscado') 
-    
+
+    const divImgBuscado = document.createElement('div')
+    divImgBuscado.classList.add('divImgBuscado');
+
+    //imagen del pokemon 
     const imgPokemonBuscado = document.createElement('img')
     imgPokemonBuscado.classList.add('imgPokemonBuscado')
-    imgPokemonBuscado.src = imagenUrl;
+    if(imagenAnimated === null){
+         imgPokemonBuscado.src = imagenDefault;
+         imgPokemonBuscado.onmouseenter = function () {
+            imgPokemonBuscado.src = pokemon.sprites.back_default;
+            if (pokemon.sprites.back_default=== null) {
+                imgPokemonBuscado.src = imagenDefault;
+            }
+         }
+         imgPokemonBuscado.onmouseout = function () {
+        imgPokemonBuscado.src =  imagenDefault;
+        }
+    }
+    else{
+        imgPokemonBuscado.src = imagenAnimated;
+    }
 
-    divPokemonBuscado.appendChild(imgPokemonBuscado)
+    if(imagenAnimated != null){
+    imgPokemonBuscado.onmouseenter = function () {
+        
+    imgPokemonBuscado.src = pokemon['sprites']['versions']['generation-v']['black-white']['animated']['back_default'];
+    
+        if (pokemon['sprites']['versions']['generation-v']['black-white']['animated']['back_default'] === null) {
+            imgPokemonBuscado.src = pokemon['sprites']['versions']['generation-v']['black-white']['animated']['front_default'];
+        }
+    }
+
+    imgPokemonBuscado.onmouseout = function () {
+        imgPokemonBuscado.src = pokemon['sprites']['versions']['generation-v']['black-white']['animated']['front_default'];
+    }
+}
+
+    
+
+    divImgBuscado.appendChild(imgPokemonBuscado)
+
+    //creamos div para el nombre del pokemon 
+    const detallePokemonBuscado = document.createElement("div");
+    detallePokemonBuscado.classList.add('detallePokemonBuscado') 
+
+    //creamos div para las propiedades del pokemon
+    const propiedadesPokemonBuscado = document.createElement("div");
+    propiedadesPokemonBuscado.classList.add('propiedadesPokemonBuscado')
+   
+
+    //agregamos el nombre del pokemon
+    const nombrePokemon = document.createElement("p")
+    nombrePokemon.classList.add("nombrePokemon")
+    nombrePokemon.textContent = nombre;
+    detallePokemonBuscado.appendChild(nombrePokemon);   
+
+    const divTypes = document.createElement('div')
+    divTypes.classList.add('divTypes')
+
+    //integramos los o el tipo del pokemon
+    pokemon.types.forEach(type => {
+        const typePoke = document.createElement("p")
+        typePoke.classList.add("typePoke");
+        typePoke.textContent = type.type.name;
+        typePoke.style.background = typeColors[type.type.name];
+        
+        detallePokemonBuscado.appendChild(divTypes)
+        detallePokemonBuscado.appendChild(typePoke)
+        divTypes.appendChild(typePoke)
+    })
+
+        if(pokemon.types.length === 1){
+            detallePokemonBuscado.style.background = `${typeColors[pokemon.types[0].type.name]}`
+            propiedadesPokemonBuscado.style.background = `${typeColors[pokemon.types[0].type.name]}`
+        } 
+        else{
+            detallePokemonBuscado.style.background = `linear-gradient(${typeColors[pokemon.types[0].type.name]},${typeColors[pokemon.types[1].type.name]})`;
+            propiedadesPokemonBuscado.style.background = `linear-gradient(to top,${typeColors[pokemon.types[0].type.name]},${typeColors[pokemon.types[1].type.name]})`;
+            
+        }
+    
+   
+    
+
+    divPokemonBuscado.appendChild(divImgBuscado)
+    divPokemonBuscado.appendChild(detallePokemonBuscado)
+    divPokemonBuscado.appendChild(propiedadesPokemonBuscado)
+    //integramos el div en el body 
     document.body.appendChild(divPokemonBuscado);
 }
 
