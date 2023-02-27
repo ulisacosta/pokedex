@@ -2,7 +2,7 @@
 const container = document.getElementById('container');
 const buttonAnimated = document.getElementById('buttonAnimated')
 const buscarPokemon = document.getElementById('buscarPokemon');
-
+let mostrandoPokemon = false;
 
 
 function removeChildNodes(parent){
@@ -11,7 +11,12 @@ function removeChildNodes(parent){
     }
 }
 
-let limitePokemon = 100;
+function removeDivs(){
+    const divsPokemonBuscados = document.querySelectorAll(".divPokemonBuscado");
+    divsPokemonBuscados.forEach(div => div.remove());
+}
+
+let limitePokemon = 6;
 
 
 const typeColors = {
@@ -40,12 +45,8 @@ const typeColors = {
 async function addPokemon(id) {
     try {
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/?language=es/`)
-
         const data = await response.json()
-        
         createPokemon(data)
-        
-       /*  buscarPokemon.addEventListener("keyup", function (e) { buscador(e,data) }) */
     }
     catch (error) {
         console.error(error);
@@ -144,14 +145,16 @@ function createPokemon(poke) {
 
 //Buscador de pokemones //
 
-buscarPokemon.addEventListener("input",function(){
+buscarPokemon.addEventListener("input",async function(){
+  
     const valorBusqueda = buscarPokemon.value.trim().toLowerCase();
 
+  
+    
     if(valorBusqueda.length  < 2){
-        container.innerHTML = "";
-        return;
+        removeChildNodes(container)
     }
-
+ 
     const url = `https://pokeapi.co/api/v2/pokemon?limit=500&offset=0`;
 
     fetch(url)
@@ -160,7 +163,19 @@ buscarPokemon.addEventListener("input",function(){
     .catch(error => console.error(error));
 });
 
+
+
 function mostrarResultadosBusqueda(data,valorBusqueda){
+
+    if (valorBusqueda.trim() === "" || valorBusqueda.trim().length === 1) {
+        
+        removeDivs()
+        
+        mostrandoPokemon = false;
+        pokemon(limitePokemon)
+        return;
+      }
+
     const pokemones = data.results;
 
     const pokemonesFiltrados = pokemones.filter(pokemon => pokemon.name.startsWith(valorBusqueda));
@@ -169,33 +184,68 @@ function mostrarResultadosBusqueda(data,valorBusqueda){
     removeChildNodes(container)
 
     if(pokemonesFiltrados.length === 0){
+
+        removeDivs();
+
         const mensaje = document.createElement("p");
         mensaje.textContent = "No se encontraron resultados para la busqueda";
         container.appendChild(mensaje);
         return;
     }
+    
+    else if(pokemonesFiltrados.length === 1){
 
+            const primerPokemonFiltrados = pokemonesFiltrados[0];
+            const url = primerPokemonFiltrados.url;
+            if (!mostrandoPokemon) {
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                mostrarPokemon(data);
+               /*  mostrandoPokemon = true; */
+            })
+            .catch(error=>console.error(error));
+
+    } 
+}
+
+
+else{
+    mostrandoPokemon = false;
+
+    removeDivs()
+    
     pokemonesFiltrados.forEach(pokemon =>{
         const url = pokemon.url;
         fetch(url)
         .then(response => response.json())
-        .then(data => mostrarPokemon(data))
+        .then(data => createPokemon(data))
         .catch(error=>console.error(error));
     });
 }
+}
+
 
 function mostrarPokemon(pokemon) {
+    
     const nombre = pokemon.name;
     const imagenUrl = pokemon.sprites.front_default;
-  
-    const nuevoElemento = document.createElement("div");
-    nuevoElemento.innerHTML = `
-      <h2>${nombre}</h2>
-      <img src="${imagenUrl}" alt="${nombre}">
-    `;
-  
-    container.appendChild(nuevoElemento);
-  }
+
+    removeDivs()
+
+    const divPokemonBuscado = document.createElement("div");
+    divPokemonBuscado.classList.add('divPokemonBuscado') 
+    
+    const imgPokemonBuscado = document.createElement('img')
+    imgPokemonBuscado.classList.add('imgPokemonBuscado')
+    imgPokemonBuscado.src = imagenUrl;
+
+    divPokemonBuscado.appendChild(imgPokemonBuscado)
+    document.body.appendChild(divPokemonBuscado);
+}
+
+
+
 
 
 
