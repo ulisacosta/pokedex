@@ -3,15 +3,15 @@ const container = document.getElementById('container');
 const buttonAnimated = document.getElementById('buttonAnimated')
 const buscarPokemon = document.getElementById('buscarPokemon');
 let mostrandoPokemon = false;
+let busquedaActiva = false;
 
-
-function removeChildNodes(parent){
-    while(parent.firstChild){
+function removeChildNodes(parent) {
+    while (parent.firstChild) {
         parent.removeChild(parent.firstChild)
     }
 }
 
-function removeDivs(){
+function removeDivs() {
     const divsPokemonBuscados = document.querySelectorAll(".divPokemonBuscado");
     divsPokemonBuscados.forEach(div => div.remove());
 }
@@ -43,7 +43,7 @@ const typeColors = {
 
 //llamamos a la API para conseguir los datos
 async function addPokemon(id) {
-  
+
     try {
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}/?language=es/`)
         const data = await response.json()
@@ -57,6 +57,9 @@ async function addPokemon(id) {
 //iteramos entre los pokemones llamando a la funcion con los datos 
 async function pokemon(limitePokemon) {
     for (let i = 0; i <= limitePokemon; i++) {
+        if (busquedaActiva) {
+            break;
+        }
         await addPokemon(i)
     }
 }
@@ -135,8 +138,8 @@ function createPokemon(poke) {
         divTypes.appendChild(typePoke)
     })
 
-  
-     
+
+
     //integramos el container que va a tener los elementos del pokemon en el container principal
     container.appendChild(card)
 
@@ -145,46 +148,37 @@ function createPokemon(poke) {
 
 //Buscador de pokemones //
 
-buscarPokemon.addEventListener("input",async function(){
-  
+buscarPokemon.addEventListener("input", async function () {
+
     const valorBusqueda = buscarPokemon.value.trim().toLowerCase();
     const url = `https://pokeapi.co/api/v2/pokemon?limit=800&offset=0`
 
-  
-    
-    if(valorBusqueda.length  < 2){
+    mostrandoPokemon = false;
+
+    if (valorBusqueda.length < 2) {
+        busquedaActiva = true;
         removeChildNodes(container)
     }
-
-    
-    try {
-        const response = await  fetch(url)
-        const data = await response.json()
-        mostrarResultadosBusqueda(data,valorBusqueda)
+    if (valorBusqueda.length === 0) {
+        busquedaActiva = false;
     }
-    catch (error) {
-        console.error(error);
-    }
-    /* const url = `https://pokeapi.co/api/v2/pokemon?limit=800&offset=0`;
 
     fetch(url)
-    .then(response => response.json())
-    .then(data => mostrarResultadosBusqueda(data,valorBusqueda))
-    .catch(error => console.error(error)); */
+        .then(response => response.json())
+        .then(data => mostrarResultadosBusqueda(data, valorBusqueda))
+        .catch(error => console.error(error));
 });
 
 
 
-async function mostrarResultadosBusqueda(data,valorBusqueda){
+async function mostrarResultadosBusqueda(data, valorBusqueda) {
 
     if (valorBusqueda.trim() === "" || valorBusqueda.trim().length === 1) {
-        
-        removeDivs()
-        
+        removeDivs();
         mostrandoPokemon = false;
         pokemon(limitePokemon)
         return;
-      }
+    }
 
     const pokemones = data.results;
 
@@ -193,76 +187,69 @@ async function mostrarResultadosBusqueda(data,valorBusqueda){
 
     removeChildNodes(container)
 
-    if(pokemonesFiltrados.length === 0){
-
+    if (pokemonesFiltrados.length === 0) {
+       
         removeDivs();
 
+        const divMensaje = document.createElement("div")
+        divMensaje.classList.add("divMensaje");
+        divMensaje.classList.add("animate__animated");
+        divMensaje.classList.add("animate__swing");
+        
         const mensaje = document.createElement("p");
         mensaje.textContent = "No se encontraron resultados para la busqueda";
-        container.appendChild(mensaje);
+        mensaje.classList.add("mensaje")
+
+        container.appendChild(divMensaje);
+        divMensaje.appendChild(mensaje);
         return;
     }
-    
-    else if(pokemonesFiltrados.length === 1){
 
-            const primerPokemonFiltrados = pokemonesFiltrados[0];
-            const url = primerPokemonFiltrados.url;
+    else if (pokemonesFiltrados.length === 1) {
+        
+        const primerPokemonFiltrados = pokemonesFiltrados[0];
+        const url = primerPokemonFiltrados.url;
 
-            if (!mostrandoPokemon) {
-                
-                try {
-                    const response = await fetch(url)
-                    const data = await response.json()
-                    mostrarPokemon(data)
-                }
-                catch (error) {
-                    console.error(error);
-                }
-
-            /*fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                mostrarPokemon(data);
-              mostrandoPokemon = true;
-            })
-            .catch(error=>console.error(error)); */
-
-    } 
-}
-
-
-else{
-    mostrandoPokemon = false;
-   
-    removeDivs()
-    
-    pokemonesFiltrados.forEach(pokemon =>{
-        const url = pokemon.url;
-        try {
-            const response =  fetch(url)
-            const data =  response.json()
+        if (!mostrandoPokemon) {
             
-            createPokemon(data)
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    mostrarPokemon(data);
+                    
+                    mostrandoPokemon = true;
+                })
+                .catch(error => console.error(error));
+
         }
-        catch (error) {
-            console.error(error);
-        }
-        /* const url = pokemon.url;
-        fetch(url)
-        .then(response => response.json())
-        .then(data => createPokemon(data))
-        .catch(error=>console.error(error));
-    }); */
-   
-})
+    }
+
+
+
+    else {
+       
+        mostrandoPokemon = false;
+
+        removeDivs()
+
+        pokemonesFiltrados.forEach(pokemon => {
+            const url = pokemon.url;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => createPokemon(data))
+                .catch(error => console.error(error));
+        });
+
+    }
 }
-}
+
 
 
 
 //Muestra el pokemon cuando coincide con uno solo en la búsqueda
 function mostrarPokemon(pokemon) {
-    
+
+
     const nombre = pokemon.name;
     const imagenAnimated = pokemon['sprites']['versions']['generation-v']['black-white']['animated']['front_default'];
     const imagenDefault = pokemon.sprites.front_default;
@@ -270,7 +257,10 @@ function mostrarPokemon(pokemon) {
 
     //div para la carta del pokemon
     const divPokemonBuscado = document.createElement("div");
-    divPokemonBuscado.classList.add('divPokemonBuscado') 
+    divPokemonBuscado.classList.add('divPokemonBuscado')
+    divPokemonBuscado.classList.add("animate__animated");
+    divPokemonBuscado.classList.add("animate__zoomInDown");
+    
 
     const divImgBuscado = document.createElement('div')
     divImgBuscado.classList.add('divImgBuscado');
@@ -278,55 +268,61 @@ function mostrarPokemon(pokemon) {
     //imagen del pokemon 
     const imgPokemonBuscado = document.createElement('img')
     imgPokemonBuscado.classList.add('imgPokemonBuscado')
-    if(imagenAnimated === null){
-         imgPokemonBuscado.src = imagenDefault;
-         imgPokemonBuscado.onmouseenter = function () {
+    if (imagenAnimated === null) {
+        imgPokemonBuscado.src = imagenDefault;
+        imgPokemonBuscado.onmouseenter = function () {
             imgPokemonBuscado.src = pokemon.sprites.back_default;
-            if (pokemon.sprites.back_default=== null) {
+            if (pokemon.sprites.back_default === null) {
                 imgPokemonBuscado.src = imagenDefault;
             }
-         }
-         imgPokemonBuscado.onmouseout = function () {
-        imgPokemonBuscado.src =  imagenDefault;
+        }
+        imgPokemonBuscado.onmouseout = function () {
+            imgPokemonBuscado.src = imagenDefault;
         }
     }
-    else{
+    else {
         imgPokemonBuscado.src = imagenAnimated;
     }
 
-    if(imagenAnimated != null){
-    imgPokemonBuscado.onmouseenter = function () {
-        
-    imgPokemonBuscado.src = pokemon['sprites']['versions']['generation-v']['black-white']['animated']['back_default'];
-    
-        if (pokemon['sprites']['versions']['generation-v']['black-white']['animated']['back_default'] === null) {
+    if (imagenAnimated != null) {
+        imgPokemonBuscado.onmouseenter = function () {
+
+            imgPokemonBuscado.src = pokemon['sprites']['versions']['generation-v']['black-white']['animated']['back_default'];
+
+            if (pokemon['sprites']['versions']['generation-v']['black-white']['animated']['back_default'] === null) {
+                imgPokemonBuscado.src = pokemon['sprites']['versions']['generation-v']['black-white']['animated']['front_default'];
+            }
+        }
+
+        imgPokemonBuscado.onmouseout = function () {
             imgPokemonBuscado.src = pokemon['sprites']['versions']['generation-v']['black-white']['animated']['front_default'];
         }
     }
 
-    imgPokemonBuscado.onmouseout = function () {
-        imgPokemonBuscado.src = pokemon['sprites']['versions']['generation-v']['black-white']['animated']['front_default'];
-    }
-}
 
-    
 
     divImgBuscado.appendChild(imgPokemonBuscado)
 
     //creamos div para el nombre del pokemon 
     const detallePokemonBuscado = document.createElement("div");
-    detallePokemonBuscado.classList.add('detallePokemonBuscado') 
+    detallePokemonBuscado.classList.add('detallePokemonBuscado')
 
     //creamos div para las propiedades del pokemon
     const propiedadesPokemonBuscado = document.createElement("div");
     propiedadesPokemonBuscado.classList.add('propiedadesPokemonBuscado')
-   
 
-    //agregamos el nombre del pokemon
+     //AGREGA EL ID DEL POKEMON BUSCADO AL PRIMER DIV
+     const idPokemonBuscado = document.createElement("p");
+     idPokemonBuscado.classList.add('idPokemonBuscado')
+     idPokemonBuscado.textContent = `#${pokemon.id.toString().padStart(3, 0)}`;
+
+     detallePokemonBuscado.appendChild(idPokemonBuscado);
+
+    //AGREGA EL NOMBRE DEL POKEMON BUSCADO AL PRIMER DIV
     const nombrePokemon = document.createElement("p")
     nombrePokemon.classList.add("nombrePokemon")
     nombrePokemon.textContent = nombre;
-    detallePokemonBuscado.appendChild(nombrePokemon);   
+    detallePokemonBuscado.appendChild(nombrePokemon);
 
     const divTypes = document.createElement('div')
     divTypes.classList.add('divTypes')
@@ -337,24 +333,89 @@ function mostrarPokemon(pokemon) {
         typePoke.classList.add("typePoke");
         typePoke.textContent = type.type.name;
         typePoke.style.background = typeColors[type.type.name];
-        
+
         detallePokemonBuscado.appendChild(divTypes)
         detallePokemonBuscado.appendChild(typePoke)
         divTypes.appendChild(typePoke)
     })
 
-        if(pokemon.types.length === 1){
-            detallePokemonBuscado.style.background = `${typeColors[pokemon.types[0].type.name]}`
-            propiedadesPokemonBuscado.style.background = `${typeColors[pokemon.types[0].type.name]}`
-        } 
-        else{
-            detallePokemonBuscado.style.background = `linear-gradient(${typeColors[pokemon.types[0].type.name]},${typeColors[pokemon.types[1].type.name]})`;
-            propiedadesPokemonBuscado.style.background = `linear-gradient(to top,${typeColors[pokemon.types[0].type.name]},${typeColors[pokemon.types[1].type.name]})`;
-            
-        }
+    if (pokemon.types.length === 1) {
+        detallePokemonBuscado.style.background = `rgba(31, 33, 34, 0.8);`
+        propiedadesPokemonBuscado.style.background = `${typeColors[pokemon.types[0].type.name]}`
+    }
+    else {
+        detallePokemonBuscado.style.background = `rgba(31, 33, 34, 0.8);`;
+        propiedadesPokemonBuscado.style.background = `linear-gradient(to top,${typeColors[pokemon.types[0].type.name]},${typeColors[pokemon.types[1].type.name]})`;
+
+    }
+
     
-   
     
+    const divContainerPropiedades = document.createElement("div")
+    divContainerPropiedades.classList.add("divContainerPropiedades")
+    
+    const divTamaño = document.createElement("div")
+    divTamaño.classList.add("divTamaño")
+
+
+    const titleTamaño = document.createElement("p")
+    titleTamaño.classList.add("titleTamaño")
+    titleTamaño.textContent="SIZES"
+    
+    const peso = document.createElement("p")
+    peso.classList.add("peso");
+    peso.textContent = "WEIGHT :" + " " +pokemon.weight;
+    
+    const altura = document.createElement("p")
+    altura.classList.add("altura");
+    altura.textContent = "HEIGHT :" +" " + pokemon.height;
+    
+    divTamaño.appendChild(titleTamaño)
+    divTamaño.appendChild(peso)
+    divTamaño.appendChild(altura)
+
+    const divStats = document.createElement("div")
+    divStats.classList.add("divStats")
+
+
+    /* ELEMENTO PARA MOSTRAR EL TITULO DE LAS ESTADISTICAS */
+    const titleStats = document.createElement("p");
+    titleStats.classList.add("titleStats");
+    titleStats.textContent = "STATS";
+
+    divStats.appendChild(titleStats);
+
+
+    pokemon.stats.forEach(stat =>{
+    const stats = document.createElement("p")
+    stats.classList.add("stats")
+    stats.textContent = `${stat.stat.name}:${stat.base_stat}`;
+    divStats.appendChild(stats)
+})
+
+    const divMove = document.createElement("div")
+    divMove.classList.add("divMove")
+
+    /* ELEMENTO PARA MOSTRAR EL TITULO DE LOS MOVIMIENTOS */
+    const titleMove = document.createElement("p");
+    titleMove.classList.add("titleMove");
+    titleMove.textContent = "SOME MOVES";
+
+    divMove.appendChild(titleMove);
+
+    for (let i = 0; i < 4; i++) {
+        const move = pokemon.moves[i];
+    const moves = document.createElement("p")
+    moves.classList.add("move")
+    moves.textContent = move.move.name;
+    divMove.appendChild(moves)
+}
+
+    propiedadesPokemonBuscado.appendChild(divContainerPropiedades)
+    
+    divContainerPropiedades.appendChild(divTamaño)
+    divContainerPropiedades.appendChild(divStats)
+    divContainerPropiedades.appendChild(divMove)
 
     divPokemonBuscado.appendChild(divImgBuscado)
     divPokemonBuscado.appendChild(detallePokemonBuscado)
@@ -369,6 +430,3 @@ function mostrarPokemon(pokemon) {
 
 
 pokemon(limitePokemon)
-
-
-
